@@ -1,0 +1,242 @@
+#!/bin/bash
+# LGSM fn_details function
+# Modified by : Kugane
+# Original Author: Daniel Gibbs
+# Website: http://gameservermanagers.com
+# Version: 070915
+
+# Description: Displays server infomation.
+
+# Standard Details
+# This applies to all engines
+
+fn_details_os(){
+echo -e ""
+echo -e "\e[93mDistro Details\e[0m"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+{
+	echo -e "\e[34mDistro:\t\e[0m${os}"
+	echo -e "\e[34mArch:\t\e[0m${arch}"
+	echo -e "\e[34mKernel:\t\e[0m${kernel}"
+	echo -e "\e[34mHostname:\t\e[0m$HOSTNAME"
+	echo -e "\e[34mtmux:\t\e[0m${tmuxv}"
+	echo -e "\e[34mGLIBC:\t\e[0m${glibcv}"
+} >> .fn_details_distro
+column -s $'\t' -t .fn_details_distro
+rm -f .fn_details_distro
+}
+
+fn_details_performance(){
+echo -e ""
+echo -e "\e[93mPerformance\e[0m"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+{
+	echo -e "\e[34mUptime:\t\e[0m${days}d, ${hours}h, ${minutes}m"
+	echo -e "\e[34mAvg Load:\t\e[0m${load}"
+} >> .fn_details_performance
+column -s $'\t' -t .fn_details_performance
+rm -f .fn_details_performance
+echo -e ""
+{
+	echo -e "\e[34mMem:\t\e[34mtotal\t used\t free\e[0m"
+	echo -e "\e[34mPhysical:\t\e[0m${physmemtotal}\t${physmemused}\t${physmemfree}\e[0m"
+	echo -e "\e[34mSwap:\t\e[0m${swaptotal}\t${swapused}\t${swapfree}\e[0m"
+} >> .fn_details_performance
+column -s $'\t' -t .fn_details_performance
+rm -f .fn_details_performance
+}
+
+fn_details_disk(){
+echo -e ""
+echo -e "\e[93mStorage\e[0m"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+{
+	echo -e "\e[34mFilesystem:\t\e[0m${filesystem}"
+	echo -e "\e[34mTotal:\t\e[0m${totalspace}"
+	echo -e "\e[34mUsed:\t\e[0m${usedspace}"
+	echo -e "\e[34mAvailable:\t\e[0m${availspace}"
+	echo -e "\e[34mServerfiles:\t\e[0m${serverfilesdu}"
+	if [ -d "${backupdir}" ]; then
+		echo -e "\e[34mBackups:\t\e[0m${backupdirdu}"
+	fi
+} >> .fn_details_disk
+column -s $'\t' -t .fn_details_disk
+rm -f .fn_details_disk
+}
+
+fn_details_gameserver(){
+echo -e ""
+
+## server details
+echo -e "\e[92m${gamename} Server Details\e[0m"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+{
+	# server name
+	echo -e "\e[34mServer name:\t\e[0m${servername}"
+
+	# server ip
+	echo -e "\e[34mServer IP:\t\e[0m${ip}:${port}"
+
+	# rcon password
+	if [ -n "${rcon}" ]; then
+		echo -e "\e[34mRCON password:\t\e[0m${rcon}"
+	fi
+
+	# server password
+	if [ -n "${serverpassword}" ]; then
+		echo -e "\e[34mServer password:\t\e[0m${serverpassword}"
+	fi
+
+	# admin password
+	if [ -n "${adminpassword}" ]; then
+		echo -e "\e[34mAdmin password:\t\e[0m${adminpassword}"
+	fi
+
+	# slots
+	if [ -n "${slots}" ]; then
+		echo -e "\e[34mSlots:\t\e[0m${slots}"
+	fi
+
+	# online status
+	pid=$(tmux list-sessions 2>&1 | awk '{print $1}' | grep -Ec "^${servicename}:")
+	if [ "${pid}" == "0" ]; then
+		echo -e "\e[34mStatus:\t\e[0;31mOFFLINE\e[0m"
+	else
+		echo -e "\e[34mStatus:\t\e[0;32mONLINE\e[0m"
+	fi
+
+} >> .fn_details_gameserver
+column -s $'\t' -t .fn_details_gameserver
+rm -f .fn_details_gameserver
+echo -e ""
+
+## script details
+echo -e "\e[92m${selfname} Script Details\e[0m"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+{
+	# service name
+	echo -e "\e[34mService name:\t\e[0m${servicename}"
+
+	# script version
+	if [ -n "${version}" ]; then
+		echo -e "\e[34m${selfname} version:\t\e[0m${version}"
+	fi
+
+	# script user
+	echo -e "\e[34mUser:\t\e[0m$(whoami)"
+
+	# GLIBC required
+	if [ -n "${glibcrequired}" ]; then
+		if [ "$(ldd --version | sed -n '1 p' | tr -cd [:digit:] | tail -c 3)" -lt "$(echo "${glibcrequired}" | sed -n '1 p' | tr -cd [:digit:] | tail -c 3)" ]; then
+			if [ "${glibcfix}" == "yes" ]; then
+				echo -e "\e[34mGLIBC required:\t\e[0;31m${glibcrequired} \e[0m(\e[0;32mUsing GLIBC fix\e[0m)"
+			else
+				echo -e "\e[34mGLIBC required:\t\e[0;31m${glibcrequired}\e[0m(\e[0;32mGLIBC version too old\e[0m)"
+			fi
+		else
+			echo -e "\e[34mGLIBC required:\t\e[0;32m${glibcrequired}\e[0m"
+		fi
+	fi
+
+	# email notification
+	if [ -n "${emailnotification}" ]; then
+		echo -e "\e[34mEmail notification:\t\e[0m${emailnotification}"
+	fi
+
+	# update on start
+	if [ -n "${updateonstart}" ]; then
+		echo -e "\e[34mUpdate on start:\t\e[0m${updateonstart}"
+	fi
+
+	# script location
+	echo -e "\e[34mLocation:\t\e[0m${rootdir}"
+
+	# config file location
+	if [ -n "${servercfgfullpath}" ]; then
+		echo -e "\e[34mConfig file:\t\e[0m${servercfgfullpath}"
+	fi
+
+	# network config file location (ARMA 3)
+	if [ -n "${networkcfgfullpath}" ]; then
+		echo -e "\e[34mNetwork config file:\t\e[0m${networkcfgfullpath}"
+	fi
+} >> .fn_details_script
+column -s $'\t' -t .fn_details_script
+rm -f .fn_details_script
+}
+
+fn_details_backup(){
+echo -e ""
+echo -e "\e[92mBackups\e[0m"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+if [ ! -d "${backupdir}" ] || [ "${backupcount}" == "0" ]; then
+	echo -e "No Backups created"
+else
+	{
+		echo -e "\e[34mNo. of backups:\t\e[0m${backupcount}"
+		echo -e "\e[34mLatest backup:\e[0m"
+		echo -e "\e[34m    date:\t\e[0m${lastbackupdate}"
+		echo -e "\e[34m    file:\t\e[0m${lastbackup}"
+		echo -e "\e[34m    size:\t\e[0m${lastbackupsize}"
+	} >> .fn_details_backup
+	column -s $'\t' -t .fn_details_backup
+	rm -f .fn_details_backup
+fi
+}
+
+fn_details_commandlineparms(){
+echo -e ""
+echo -e "\e[92mCommand-line Parameters\e[0m"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+echo -e "${executable} ${parms}"
+}
+
+fn_details_statusbottom(){
+echo -e ""
+if [ "${pid}" == "0" ]; then
+	echo -e "\e[34mStatus: \e[0;31mOFFLINE\e[0m"
+else
+	echo -e "\e[34mStatus: \e[0;32mONLINE\e[0m"
+fi
+
+echo -e ""
+}
+
+# Engine Specific details
+
+fn_details_realvirtuality(){
+fn_check_ip
+pid=$(tmux list-sessions 2>&1 | awk '{print $1}' | grep -Ec "^${servicename}:")
+fn_parms
+fn_details_config
+fn_details_distro
+fn_details_os
+fn_details_performance
+fn_details_disk
+fn_details_gameserver
+fn_details_backup
+fn_details_commandlineparms
+echo -e ""
+echo -e "\e[92mPorts\e[0m"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+echo -e ""
+echo -e "Useful port diagnostic command:"
+echo -e "netstat -atunp | grep "${servicename}""
+echo -e ""
+{
+	echo -e "DESCRIPTION\tDIRECTION\tPORT\tPROTOCOL"
+	echo -e "> Game\tINBOUND\t${port}\tudp"
+	echo -e "> Steam: Query\tINBOUND\t${var=`expr "$port" + 1`}\tudp"
+} >> .fn_details_ports
+column -s $'\t' -t .fn_details_ports
+rm -f .fn_details_ports
+fn_details_statusbottom
+}
+
+fn_details_glibc
+
+if [ "${engine}" == "realvirtuality" ]; then
+	fn_details_realvirtuality
+else
+	fn_printerrornl "Unable to detect server engine."
+fi

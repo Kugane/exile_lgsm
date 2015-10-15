@@ -1,0 +1,119 @@
+
+#!/bin/bash
+# ARMA 3
+# Server Management Script
+# Author: Daniel Gibbs
+# Contributor: Scarsz
+# Website: http://gameservermanagers.com
+version="040715"
+
+#### Variables ####
+
+# Notification Email
+# (on|off)
+emailnotification="off"
+email="email@example.com"
+
+# Steam login 
+# don't use your Steam Account!!!
+# create a new one for it!
+steamuser="steamuser"
+steampass="steampass"
+
+# Start Variables
+ip="0.0.0.0"
+port="2302"
+updateonstart="off"
+
+fn_parms(){
+parms=" -ip=${ip} -port=${port} -cfg=${networkcfgfullpath} -config=${servercfgfullpath} -loadMissionToMemory -ServerMod=${servermods} -mod=${mods} -autoInit -nolog"
+}
+
+# ARMA 3 Modules
+# add mods with relative paths:
+# mods/\@CBA_A3\;
+# or several mods as:
+# mods/\@CBA_A3\;mods/\@task_force_radio
+# and chmod modules directories to 775
+mods="@Exile\;"
+servermods="@ExileServer\;@extDB2\;"
+
+#### Advanced Variables ####
+
+# Steam
+# Stable
+appid="233780"
+# Development
+# appid="233780 -beta development"
+
+# Server Details
+servicename="exileserver"
+gamename="ARMA 3"
+engine="realvirtuality"
+
+# Directories
+rootdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+selfname="$(basename $0)"
+lockselfname=".${servicename}.lock"
+
+filesdir="${rootdir}/serverfiles/${servicename}"
+systemdir="${filesdir}"
+executabledir="${filesdir}"
+
+executable="./arma3server >>${consolelogdir}/${consolelog} 2>&1"
+
+servercfg="${servicename}.server.cfg"
+networkcfg="${servicename}.network.cfg"
+
+rcondir="${systemdir}/rcon"
+servercfgdir="${systemdir}/cfg"
+servercfgfullpath="${servercfgdir}/${servercfg}"
+networkcfgfullpath="${servercfgdir}/${networkcfg}"
+servercfgdefault="${servercfgdir}/exlgsm-default.server.cfg"
+networkcfgdefault="${servercfgdir}/exlgsm-default.network.cfg"
+
+backupdir="${rootdir}/backups"
+
+# Logging
+logdays="7"
+
+scriptlogdir="${rootdir}/log/script"
+consolelogdir="${rootdir}/log/console"
+consolelogdirstored="${rootdir}/log/console/$(date +%Y)/$(date +%m)/$(date +%d)"
+
+scriptlog="${scriptlogdir}/${servicename}.log"
+consolelog="${consolelogdir}/${servicename}.rpt"
+emaillog="${scriptlogdir}/${servicename}.log"
+
+scriptlogdate="${scriptlogdir}/${servicename}_$(date '+%d-%m-%Y-%H-%M-%S').log"
+consolelogdate="${servicename}_$(date '+%H-%M-%S').rpt"
+
+##### Script #####
+# Do not edit
+
+fn_runfunction(){
+# Functions are downloaded and run with this function
+if [ ! -f "${rootdir}/functions/${functionfile}" ]; then
+	cd "${rootdir}"
+	if [ ! -d "functions" ]; then
+		mkdir functions
+	fi
+	cd functions
+	echo -e "    loading ${functionfile}...\c"
+	wget -N /dev/null https://raw.githubusercontent.com/dgibbs64/linuxgsm/master/functions/${functionfile} 2>&1 | grep -F HTTP | cut -c45-
+	chmod +x "${functionfile}"
+	cd "${rootdir}"
+fi
+source "${rootdir}/functions/${functionfile}"
+}
+
+fn_functions(){
+# Functions are defined in fn_functions.
+functionfile="${FUNCNAME}"
+fn_runfunction
+}
+
+fn_functions
+
+getopt=$1
+fn_getopt

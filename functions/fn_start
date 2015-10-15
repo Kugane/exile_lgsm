@@ -1,0 +1,109 @@
+#!/bin/bash
+# LGSM fn_start function
+# Modified by : Kugane
+# Original Author: Daniel Gibbs
+# Website: http://gameservermanagers.com
+# Version: 150715
+
+# Description: Starts the server.
+
+local modulename="Starting"
+
+fn_start_tmux(){
+fn_check_root
+fn_check_systemdir
+fn_check_ip
+fn_check_logs
+fn_details_config
+fn_parms
+fn_logs
+fn_printdots "${servername}"
+fn_scriptlog "${servername}"
+sleep 1
+fn_check_tmux
+
+# Will check for updates if updateonstart is yes
+if [ "${updateonstart}" == "yes" ]||[ "${updateonstart}" == "1" ]; then
+	fn_update_check
+fi
+
+tmuxwc=$(tmux list-sessions 2>&1|awk '{print $1}'|grep -v failed|grep -Ec "^${servicename}:")
+if [ "${tmuxwc}" -eq 0 ]; then
+	fn_scriptlog "Rotating log files"
+	mv "${scriptlog}" "${scriptlogdate}"
+	cd "${consolelogdir}"/ && mkdir -p "${consolelogdirstored}"
+	sleep 2
+	mv "${consolelog}" "${consolelogdirstored}"/"${consolelogdate}"
+	sleep 2
+fi
+
+if [ "${tmuxwc}" -eq 1 ]; then
+	fn_printinfo "${servername} is already running"
+	fn_scriptlog "${servername} is already running"
+	sleep 1
+	echo -en "\n"
+	exit
+fi
+
+# Create lock file
+date > "${rootdir}/${lockselfname}"
+cd "${executabledir}"
+tmux new-session -d -s "${servicename}" "${executable} ${parms}" 2> "${scriptlogdir}/.${servicename}-tmux-error.tmp"
+sleep 1
+tmuxwc=$(tmux list-sessions 2>&1|awk '{print $1}'|grep -Ec "^${servicename}:")
+# If the server fails to start
+if [ "${tmuxwc}" -eq 0 ]; then
+	fn_printfail "Unable to start ${servername}"
+	fn_scriptlog "Unable to start ${servername}"
+	sleep 1
+	if [ -s "${scriptlogdir}/.${servicename}-tmux-error.tmp" ]; then
+		fn_printfail "Unable to start ${servername}: Tmux error:"
+		fn_scriptlog "Tmux error"
+		sleep 1
+		echo -en "\n"
+		echo ""
+		echo "Command"
+		echo "================================="
+		echo "tmux new-session -d -s \"${servicename}\" \"${executable} ${parms}\""
+		echo "tmux new-session -d -s \"${servicename}\" \"${executable} ${parms}\"" >> "${scriptlog}"
+		echo ""
+		echo "Error"
+		echo "================================="
+		cat "${scriptlogdir}/.${servicename}-tmux-error.tmp"
+		cat "${scriptlogdir}/.${servicename}-tmux-error.tmp" >> "${scriptlog}"
+
+		# Detected error http://gameservermanagers.com/issues
+		if [ $(grep -c "Operation not permitted" "${scriptlogdir}/.${servicename}-tmux-error.tmp") ];then
+		echo ""
+		echo "Fix"
+		echo "================================="
+			if [ ! $(grep "tty:" /etc/group|grep "$(whoami)") ];then
+				echo "$(whoami) is not part of the tty group."
+				fn_scriptlog "$(whoami) is not part of the tty group."
+				group=$(grep tty /etc/group)
+				echo ""
+				echo "	${group}"
+				fn_scriptlog "${group}"
+				echo ""
+				echo "Run the following command with root privileges."
+				echo ""
+				echo "	usermod -G tty $(whoami)"
+				echo ""
+				echo "http://gameservermanagers.com/tmux-op-perm"
+				fn_scriptlog "http://gameservermanagers.com/tmux-op-perm"
+			else
+				echo "No known fix currently. Please log an issue."
+				fn_scriptlog "No known fix currently. Please log an issue."
+				echo "http://gameservermanagers.com/issues"
+				fn_scriptlog "http://gameservermanagers.com/issues"
+			fi
+		fi
+	fi
+else
+	fn_printok "${servername}"
+	fn_scriptlog "Started ${servername}"
+fi
+rm "${scriptlogdir}/.${servicename}-tmux-error.tmp"
+echo -en "\n"
+}
+	fn_start_tmux

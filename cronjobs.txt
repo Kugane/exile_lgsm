@@ -1,0 +1,13 @@
+0 * * * *     /home/steam/arma3server update > /dev/null 2>&1			# Checks every hour whether an update is available Arma 3 & announce restarts for automatic update
+*/2 * * * *   /home/steam/arma3server monitor > /dev/null 2>&1			# Checks every 2 minutes if the server is online and if not he restarts him
+0 2,5,10,14,18,22 * * * /home/steam/exileserver restart > /dev/null 2>&1	# Server Restart
+
+# RCON Cronjobs to announce restarts
+10,30,50 0-1 * * * php -q /home/steam/serverfiles/exileserver/@ExileServer/rcon/resinf.php  #Restart Information
+30 1,4,9,13,17,21 * * * php -q /home/steam/serverfiles/exileserver/@ExileServer/rcon/restart30min.php  # 30 Min Restart
+45 1,4,9,13,17,21 * * * php -q /home/steam/serverfiles/exileserver/@ExileServer/rcon/restart15min.php  # 15 Min Restart
+50 1,4,9,13,17,21 * * * php -q /home/steam/serverfiles/exileserver/@ExileServer/rcon/restart10min.php  # 10 Min Restart
+55 1,4,9,13,17,21 * * * php -q /home/steam/serverfiles/exileserver/@ExileServer/rcon/restart5min.php   # 5 Min Restart
+56 1,4,9,13,17,21 * * * php -q /home/steam/serverfiles/exileserver/@ExileServer/rcon/lock.php   # Server Lock
+57 1,4,9,13,17,21 * * * php -q /home/steam/serverfiles/exileserver/@ExileServer/rcon/restart3min.php   # 3 Min Restart
+58 1,4,9,13,17,21 * * * php -q /home/steam/serverfiles/exileserver/@ExileServer/rcon/restart2min.php   # 2 Min Restart

@@ -1,0 +1,249 @@
+#!/bin/bash
+# LGSM fn_update_check function
+# Modified by : Kugane
+# Original Author: Daniel Gibbs
+# Website: http://gameservermanagers.com
+# Version: 030615
+
+# Description: Checks if a server update is available.
+
+local modulename="Update"
+
+### SteamCMD Update Checker ###
+
+fn_appmanifestinfo(){
+	appmanifestfile=$(find "${filesdir}" -type f -name "appmanifest_${appid}.acf")
+	appmanifestfilewc=$(find "${filesdir}" -type f -name "appmanifest_${appid}.acf"|wc -l)
+}
+
+fn_appmanifestcheck(){
+fn_appmanifestinfo
+# Multiple or no matching appmanifest files may sometimes be available.
+# This is an error is corrected below if required.
+if [ "${appmanifestfilewc}" -ge "2" ]; then
+	sleep 1
+	fn_printwarn "Multiple appmanifest_${appid}.acf files found"
+	fn_scriptlog "Warning! Multiple appmanifest_${appid}.acf files found"
+	sleep 2
+	fn_printdots "Removing x${appmanifestfilewc} appmanifest_${appid}.acf files"
+	sleep 1
+	for appfile in ${appmanifestfile}; do
+		rm "${appfile}"
+	done
+	appmanifestfilewc1="${appmanifestfilewc}"
+	fn_appmanifestinfo
+	if [ "${appmanifestfilewc}" -ge "2" ]; then
+		fn_printfail "Unable to remove x${appmanifestfilewc} appmanifest_${appid}.acf files"
+		fn_scriptlog "Failure! Unable to remove x${appmanifestfilewc} appmanifest_${appid}.acf files"
+		sleep 1
+		echo ""
+		echo "	Check user permissions"
+		for appfile in ${appmanifestfile}; do
+			echo "	${appfile}"
+		done
+		exit
+	else
+		sleep 1
+		fn_printok "Removed x${appmanifestfilewc1} appmanifest_${appid}.acf files"
+		fn_scriptlog "Success! Removed x${appmanifestfilewc1} appmanifest_${appid}.acf files"
+		sleep 1
+		fn_printinfonl "Forcing update to correct issue"
+		fn_scriptlog "Forcing update to correct issue"
+		sleep 1
+		fn_update_dl
+		fn_update_check
+	fi
+elif [ "${appmanifestfilewc}" -eq "0" ]; then
+	if [ "${forceupdate}" -eq "1" ]; then
+		fn_printfail "Still no appmanifest_${appid}.acf found: Unable to update"
+		fn_scriptlog "Warning! Still no appmanifest_${appid}.acf found: Unable to update"
+		exit
+	fi
+	forceupdate=1
+	fn_printwarn "No appmanifest_${appid}.acf found"
+	fn_scriptlog "Warning! No appmanifest_${appid}.acf found"
+	sleep 2
+	fn_printinfonl "Forcing update to correct issue"
+	fn_scriptlog "Forcing update to correct issue"
+	sleep 1
+	fn_update_dl
+	fn_update_check
+fi
+}
+
+fn_logupdaterequest(){
+# Checks for server update requests from server logs.
+fn_printdots "Checking for update: Server logs"
+fn_scriptlog "Checking for update: Server logs"
+sleep 1
+requestrestart=$(grep -Ec "MasterRequestRestart" "${consolelog}")
+if [ "${requestrestart}" -ge "1" ]; then
+	fn_printoknl "Checking for update: Server logs: Update requested"
+	sleep 1
+	echo ""
+	echo -ne "Applying update.\r"
+	sleep 1
+	echo -ne "Applying update..\r"
+	sleep 1
+	echo -ne "Applying update...\r"
+	sleep 1
+	echo -ne "\n"
+	tmuxwc=$(tmux list-sessions 2>&1|awk '{print $1}'|grep -v failed|grep -Ec "^${servicename}:")
+	if [ "${tmuxwc}" -eq 1 ]; then
+		fn_stop
+		fn_update_dl
+		fn_start
+	else
+		fn_update_dl
+	fi
+else
+	fn_printok "Checking for update: Server logs: No update requested"
+	sleep 1
+fi
+}
+
+fn_steamcmdcheck(){
+fn_check_steamcmd
+fn_check_steamuser
+fn_appmanifestcheck
+# Checks for server update from SteamCMD
+fn_printdots "Checking for update: SteamCMD"
+fn_scriptlog "Checking for update: SteamCMD"
+sleep 1
+
+# Gets currentbuild
+currentbuild=$(grep buildid "${appmanifestfile}" | tr '[:blank:]"' ' ' | tr -s ' ' | cut -d\  -f3)
+
+# Gets availablebuild info
+cd "${rootdir}/steamcmd"
+
+# Removes appinfo.vdf as a fix for not always getting up to date version info from SteamCMD
+
+if [ -f "${rootdir}/Steam/appcache/appinfo.vdf" ]; then
+	rm -f "${rootdir}/Steam/appcache/appinfo.vdf"
+fi
+availablebuild=$(./steamcmd.sh +login "${steamuser}" "${steampass}" +app_info_update 1 +app_info_print "${appid}" +app_info_print "${appid}" +quit | grep -EA 1000 "^\s+\"branches\"$" | grep -EA 5 "^\s+\"public\"$" | grep -m 1 -EB 10 "^\s+}$" | grep -E "^\s+\"buildid\"\s+" | tr '[:blank:]"' ' ' | tr -s ' ' | cut -d\  -f3)
+if [ -z "${availablebuild}" ]; then
+	fn_printfail "Checking for update: SteamCMD"
+	fn_scriptlog "Failure! Checking for update: SteamCMD"
+	sleep 1
+	fn_printfail "Checking for update: SteamCMD: Not returning version info"
+	fn_scriptlog "Failure! Checking for update: SteamCMD: Not returning version info"
+	sleep 2
+	exit
+else
+	fn_printok "Checking for update: SteamCMD"
+	fn_scriptlog "Success! Checking for update: SteamCMD"
+	sleep 1
+fi
+
+if [ "${currentbuild}" -ne "${availablebuild}" ]; then
+	echo -e "\n"
+	echo -e "Update available:"
+	sleep 1
+	echo -e "	Current build: \e[0;31m${currentbuild}\e[0;39m"
+	echo -e "	Available build: \e[0;32m${availablebuild}\e[0;39m"
+	echo -e ""
+	echo -e "	https://steamdb.info/app/${appid}/"
+	sleep 1
+	echo ""
+	echo -en "Applying update.\r"
+	sleep 1
+	echo -en "Applying update..\r"
+	sleep 1
+	echo -en "Applying update...\r"
+	sleep 1
+	echo -en "\n"
+	fn_scriptlog "Update available"
+	fn_scriptlog "Current build: ${currentbuild}"
+	fn_scriptlog "Available build: ${availablebuild}"
+	fn_scriptlog "${currentbuild} > ${availablebuild}"
+
+	tmuxwc=$(tmux list-sessions 2>&1|awk '{print $1}'|grep -v failed|grep -Ec "^${servicename}:")
+	if [ "${tmuxwc}" -eq 1 ]; then
+		if [ "${gamename}" == "ARMA 3" ]; then
+			php -q "${rcondir}"/rcon/update30min.php;
+			fn_scriptlog "Update found! Server restart in 30 Minutes!"
+			sleep 900
+			php -q "${rcondir}"/update15min.php;
+			fn_scriptlog "Update found! Server restart in 15 Minutes!"
+			sleep 300
+			php -q "${rcondir}"/rcon/update10min.php;
+			fn_scriptlog "Update found! Server restart in 10 Minutes!"
+			sleep 300
+			php -q "${rcondir}"/rcon/update5min.php;
+			fn_scriptlog "Update found! Server restart in 5 Minutes!"
+			sleep 60
+			php -q "${rcondir}"/rcon/lock.php;
+			fn_scriptlog "Update found! Server locked for restart!"
+			sleep 60
+			php -q "${rcondir}"/rcon/update3min.php;
+			fn_scriptlog "Update found! Server restart in 3 Minutes!"
+			sleep 60
+			php -q "${rcondir}"/rcon/update2min.php;
+			fn_scriptlog "Update found! Server restart in 2 Minutes!"
+			sleep 120
+			fn_stop
+			fn_update_dl
+			fn_start
+		fi
+		if [ "${gamename}" == "ARK: Survivial Evolved" ]; then
+			cd "${filesdir}" && ./rcon broadcast Update gefunden! Server restartet in 30 Minuten!
+			fn_scriptlog "Update gefunden! Server restartet in 30 Minuten!"
+			sleep 900
+			cd "${filesdir}" && ./rcon broadcast Update gefunden! Server restartet in 15 Minuten!
+			fn_scriptlog "Update gefunden! Server restartet in 15 Minuten!"
+			sleep 300
+			cd "${filesdir}" && ./rcon broadcast Update gefunden! Server restartet in 10 Minuten!
+			fn_scriptlog "Update gefunden! Server restartet in 10 Minuten!"
+			sleep 300
+			cd "${filesdir}" && ./rcon broadcast Update gefunden! Server restartet in 5 Minuten!
+			fn_scriptlog "Update gefunden! Server restartet in 5 Minuten!"
+			sleep 240
+			cd "${filesdir}" && ./rcon broadcast Update gefunden! Server restartet in 1 Minute!
+			fn_scriptlog "Update gefunden! Server restartet in 1 Minute!"
+			sleep 45
+			cd "${filesdir}" && ./rcon broadcast Update gefunden! Server restartet in 15 Sekunden!
+			fn_scriptlog "Update gefunden! Server restartet in 15 Sekunden!"
+			sleep 15
+			fn_stop
+			fn_update_dl
+			fn_start
+		fi
+		
+		fn_stop
+		fn_update_dl
+		fn_start
+	else
+		fn_update_dl
+	fi
+else
+	echo -e "\n"
+	echo -e "No update available:"
+	echo -e "	Current version: \e[0;32m${currentbuild}\e[0;39m"
+	echo -e "	Available version: \e[0;32m${availablebuild}\e[0;39m"
+	echo -e "	https://steamdb.info/app/${appid}/"
+	echo -e ""
+	fn_printoknl "No update available"
+	fn_scriptlog "Current build: ${currentbuild}"
+	fn_scriptlog "Available build: ${availablebuild}"
+fi
+}
+
+### END SteamCMD Update Checker ###
+
+fn_check_logs
+fn_printdots "Checking for update"
+if [ "${forceupdate}" == "1" ]; then
+	tmuxwc=$(tmux list-sessions 2>&1|awk '{print $1}'|grep -v failed|grep -Ec "^${servicename}:")
+	if [ "${tmuxwc}" -eq 1 ]; then
+		fn_stop
+		fn_update_dl
+		fn_start
+	else
+		fn_update_dl
+	fi
+else
+	fn_logupdaterequest
+	fn_steamcmdcheck
+fi

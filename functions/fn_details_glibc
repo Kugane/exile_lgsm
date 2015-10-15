@@ -1,0 +1,13 @@
+#!/bin/bash
+# LGSM fn_details_glibc function
+# Modified by : Kugane
+# Original Author: Daniel Gibbs
+# Website: http://gameservermanagers.com
+# Version: 180715
+
+# Description: stores details on servers Glibc requirements.
+
+if [ "${engine}" == "realvirtuality" ]; then
+	glibcrequired="2.13"
+	glibcfix="yes"
+fi

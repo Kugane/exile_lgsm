@@ -1,0 +1,24 @@
+#!/bin/bash
+# LGSM fn_install function
+# Modified by : Kugane
+# Original Author: Daniel Gibbs
+# Website: http://gameservermanagers.com
+# Version: 190515
+
+fn_check_root
+fn_install_header
+if [ -z "${autoinstall}" ]; then
+	fn_install_serverdir
+	fn_install_header
+fi
+# Download and install
+if [ ! -z "${appid}" ]; then
+	fn_install_steamcmd
+	fn_install_serverfiles
+fi
+
+# Configuration
+fn_install_glibcfix
+fn_install_logs
+fn_install_config
+fn_install_complete

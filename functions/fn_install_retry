@@ -1,0 +1,14 @@
+#!/bin/bash
+# LGSM fn_install_retry function
+# Original Author: Daniel Gibbs
+# Website: http://gameservermanagers.com
+# Version: 210115
+
+while true; do
+	read -p "Retry install? [y/N]" yn
+	case $yn in
+	[Yy]* ) fn_install; exit;;
+	[Nn]* ) echo Exiting; exit;;
+	* ) echo "Please answer yes or no.";;
+	esac
+done

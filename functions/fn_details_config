@@ -1,0 +1,74 @@
+#!/bin/bash
+# LGSM fn_details_config function
+# Modified by : Kugane
+# Original Author: Daniel Gibbs
+# Website: http://gameservermanagers.com
+# Version: 090815
+
+# Description: Gets specific details from config files.
+
+## Examples of filtering to get info from config files
+# sed 's/foo//g' - remove foo
+# tr -cd [:digit:] leave only digits
+# tr -d '=\"; ' remove selected charectors =\";
+# grep -v "foo" filter out lines that contain foo
+
+fn_servercfgfullpath(){
+if [ ! -f "${servercfgfullpath}" ]; then
+	servercfgfullpath="\e[0;31mMISSING!\e[0m ${servercfgfullpath}"
+fi
+}
+
+# ARMA 3
+if [ "${engine}" == "realvirtuality" ]; then
+
+	# server name
+	if [ -f "${servercfgfullpath}" ]; then
+		servername=$(grep "hostname" "${servercfgfullpath}" | grep -v "//" | sed -e 's/\<hostname\>//g' | tr -d '=\"; ')
+		if [ ! -n "${servername}" ]; then
+			servername="NOT SET"
+		fi
+	else
+		servername="\e[0;31mUNAVAILABLE\e[0m"
+	fi
+
+	# admin password
+	if [ -f "${servercfgfullpath}" ]; then
+	adminpassword=$(grep "passwordAdmin" "${servercfgfullpath}" | grep -v "//" | sed -e 's/\passwordAdmin//g' | tr -d '=\"; ')
+		if [ ! -n "${adminpassword}" ]; then
+			adminpassword="NOT SET"
+		fi
+	else
+		adminpassword="\e[0;31mUNAVAILABLE\e[0m"
+	fi
+
+	# server password
+	if [ -f "${servercfgfullpath}" ]; then
+	serverpassword=$(grep "password =" "${servercfgfullpath}" | grep -v "//" | sed -e 's/\password//g' | tr -d '=\"; ')
+		if [ ! -n "${adminpassword}" ]; then
+			serverpassword="NOT SET"
+		fi
+	else
+		serverpassword="\e[0;31mUNAVAILABLE\e[0m"
+	fi
+
+	# slots
+	if [ -f "${servercfgfullpath}" ]; then
+			slots=$(grep "maxPlayers" "${servercfgfullpath}" | grep -v "#" | tr -cd "[:digit:]")
+		if [ ! -n "${slots}" ]; then
+			slots="NOT SET"
+		fi
+	else
+		slots="\e[0;31mUNAVAILABLE\e[0m"
+	fi
+
+	# port
+	if [ -f "${servercfgfullpath}" ]; then
+			port=$(grep "port=" "${servicename}" | grep -v // | tr -d '\r' | tr -cd "[:digit:]")
+	fi
+	if [ ! -n "${port}" ]; then
+		port="0"
+	fi
+
+	fn_servercfgfullpath
+fi

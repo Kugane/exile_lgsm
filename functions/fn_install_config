@@ -1,0 +1,55 @@
+#!/bin/bash
+# LGSM fn_install_config function
+# Modified by : Kugane
+# Original Author: Daniel Gibbs
+# Website: http://gameservermanagers.com
+# Version: 210615
+
+fn_arma3config(){
+mkdir -pv "${servercfgdir}"
+mkdir -pv "${rcondir}"
+mv -v exlgsm-default.server.cfg "${servercfgfullpath}"
+mv -v exlgsm-default.network.cfg "${networkcfgfullpath}"
+mv -v beserver.cfg "${systemdir}"/battleye
+mv -v config.php "${rcondir}"
+mv -v resinf.php "${rcondir}"
+mv -v lock.php "${rcondir}"
+mv -v 30min.php "${rcondir}"
+mv -v 15min.php "${rcondir}"
+mv -v 10min.php "${rcondir}"
+mv -v 5min.php "${rcondir}"
+mv -v 3min.php "${rcondir}"
+mv -v 2min.php "${rcondir}"
+mv -v cronjobs.txt "${systemdir}"
+
+sleep 1
+echo ""
+}
+
+
+echo ""
+echo "Creating Configs"
+echo "================================="
+sleep 1
+if [ "${gamename}" == "ARMA 3" ]; then
+	cd "${systemdir}"
+fi
+	#statements
+if [ "${gamename}" == "ARMA 3" ]; then
+	echo -e "downloading exlgsm-default.server.cfg & exlgsm-default.network.cfg...\c"
+	wget -N /dev/null http://84.200.44.162/exlgsm-default.network.cfg 2>&1 | grep -F HTTP | cut -c45- | uniq
+	wget -N /dev/null http://84.200.44.162/exlgsm-default.server.cfg 2>&1 | grep -F HTTP | cut -c45- | uniq
+	wget -N /dev/null 		beserver.cfg 2>&1 | grep -F HTTP | cut -c45- | uniq
+	wget -N /dev/null     	config.php 2>&1 | grep -F HTTP | cut -c45- | uniq
+	wget -N /dev/null 		resinf.php 2>&1 | grep -F HTTP | cut -c45- | uniq
+	wget -N /dev/null 		lock.php 2>&1 | grep -F HTTP | cut -c45- | uniq
+	wget -N /dev/null 		30min.php 2>&1 | grep -F HTTP | cut -c45- | uniq
+	wget -N /dev/null 		15min.php 2>&1 | grep -F HTTP | cut -c45- | uniq
+	wget -N /dev/null 		10min.php 2>&1 | grep -F HTTP | cut -c45- | uniq
+	wget -N /dev/null 		5min.php 2>&1 | grep -F HTTP | cut -c45- | uniq
+	wget -N /dev/null 		3min.php 2>&1 | grep -F HTTP | cut -c45- | uniq
+	wget -N /dev/null 		2min.php 2>&1 | grep -F HTTP | cut -c45- | uniq
+	wget -N /dev/null 		cronjobs.txt 2>&1 | grep -F HTTP | cut -c45- | uniq
+	sleep 1
+	fn_arma3config
+fi

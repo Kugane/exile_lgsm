@@ -1,0 +1,15 @@
+#!/bin/bash
+# LGSM fn_install_complete function
+# Modified by : Kugane
+# Original Author: Daniel Gibbs
+# Website: http://gameservermanagers.com
+# Version: 070715
+
+echo "================================="
+echo "Install Complete!"
+echo ""
+echo "Don't forget to change the passwords!"
+echo ""
+echo "To start server type:"
+echo "./${selfname} start"
+echo ""

@@ -1,0 +1,17 @@
+#!/bin/bash
+# LGSM fn_install_header function
+# Modified by : Kugane
+# Original Author: Daniel Gibbs
+# Website: http://gameservermanagers.com
+# Version: 210115
+
+clear
+echo "================================="
+echo "${gamename}"
+echo "Exile Linux Game Server Manager"
+echo "by Kugane"
+echo ""
+echo "Original by Daniel Gibbs"
+echo "contributions by Scarsz"
+echo "http://gameservermanagers.com"
+echo "================================="
