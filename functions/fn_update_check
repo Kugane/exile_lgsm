@@ -161,59 +161,30 @@ if [ "${currentbuild}" -ne "${availablebuild}" ]; then
 
 	tmuxwc=$(tmux list-sessions 2>&1|awk '{print $1}'|grep -v failed|grep -Ec "^${servicename}:")
 	if [ "${tmuxwc}" -eq 1 ]; then
-		if [ "${gamename}" == "ARMA 3" ]; then
-			php -q "${rcondir}"/rcon/update30min.php;
-			fn_scriptlog "Update found! Server restart in 30 Minutes!"
-			sleep 900
-			php -q "${rcondir}"/update15min.php;
-			fn_scriptlog "Update found! Server restart in 15 Minutes!"
-			sleep 300
-			php -q "${rcondir}"/rcon/update10min.php;
-			fn_scriptlog "Update found! Server restart in 10 Minutes!"
-			sleep 300
-			php -q "${rcondir}"/rcon/update5min.php;
-			fn_scriptlog "Update found! Server restart in 5 Minutes!"
-			sleep 60
-			php -q "${rcondir}"/rcon/lock.php;
-			fn_scriptlog "Update found! Server locked for restart!"
-			sleep 60
-			php -q "${rcondir}"/rcon/update3min.php;
-			fn_scriptlog "Update found! Server restart in 3 Minutes!"
-			sleep 60
-			php -q "${rcondir}"/rcon/update2min.php;
-			fn_scriptlog "Update found! Server restart in 2 Minutes!"
-			sleep 120
-			fn_stop
-			fn_update_dl
-			fn_start
-		fi
-		if [ "${gamename}" == "ARK: Survivial Evolved" ]; then
-			cd "${filesdir}" && ./rcon broadcast Update gefunden! Server restartet in 30 Minuten!
-			fn_scriptlog "Update gefunden! Server restartet in 30 Minuten!"
-			sleep 900
-			cd "${filesdir}" && ./rcon broadcast Update gefunden! Server restartet in 15 Minuten!
-			fn_scriptlog "Update gefunden! Server restartet in 15 Minuten!"
-			sleep 300
-			cd "${filesdir}" && ./rcon broadcast Update gefunden! Server restartet in 10 Minuten!
-			fn_scriptlog "Update gefunden! Server restartet in 10 Minuten!"
-			sleep 300
-			cd "${filesdir}" && ./rcon broadcast Update gefunden! Server restartet in 5 Minuten!
-			fn_scriptlog "Update gefunden! Server restartet in 5 Minuten!"
-			sleep 240
-			cd "${filesdir}" && ./rcon broadcast Update gefunden! Server restartet in 1 Minute!
-			fn_scriptlog "Update gefunden! Server restartet in 1 Minute!"
-			sleep 45
-			cd "${filesdir}" && ./rcon broadcast Update gefunden! Server restartet in 15 Sekunden!
-			fn_scriptlog "Update gefunden! Server restartet in 15 Sekunden!"
-			sleep 15
-			fn_stop
-			fn_update_dl
-			fn_start
-		fi
-		
+		php -q "${rcondir}"/rcon/update30min.php;
+		fn_scriptlog "Update found! Server restart in 30 Minutes!"
+		sleep 900
+		php -q "${rcondir}"/update15min.php;
+		fn_scriptlog "Update found! Server restart in 15 Minutes!"
+		sleep 300
+		php -q "${rcondir}"/rcon/update10min.php;
+		fn_scriptlog "Update found! Server restart in 10 Minutes!"
+		sleep 300
+		php -q "${rcondir}"/rcon/update5min.php;
+		fn_scriptlog "Update found! Server restart in 5 Minutes!"
+		sleep 60
+		php -q "${rcondir}"/rcon/lock.php;
+		fn_scriptlog "Update found! Server locked for restart!"
+		sleep 60
+		php -q "${rcondir}"/rcon/update3min.php;
+		fn_scriptlog "Update found! Server restart in 3 Minutes!"
+		sleep 60
+		php -q "${rcondir}"/rcon/update2min.php;
+		fn_scriptlog "Update found! Server restart in 2 Minutes!"
+		sleep 120
 		fn_stop
 		fn_update_dl
-		fn_start
+		fn_start		
 	else
 		fn_update_dl
 	fi
