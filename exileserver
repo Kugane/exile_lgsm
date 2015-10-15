@@ -60,8 +60,6 @@ filesdir="${rootdir}/serverfiles/${servicename}"
 systemdir="${filesdir}"
 executabledir="${filesdir}"
 
-executable="./arma3server >>${consolelogdir}/${consolelog} 2>&1"
-
 servercfg="${servicename}.server.cfg"
 networkcfg="${servicename}.network.cfg"
 
@@ -71,7 +69,6 @@ servercfgfullpath="${servercfgdir}/${servercfg}"
 networkcfgfullpath="${servercfgdir}/${networkcfg}"
 servercfgdefault="${servercfgdir}/exlgsm-default.server.cfg"
 networkcfgdefault="${servercfgdir}/exlgsm-default.network.cfg"
-
 backupdir="${rootdir}/backups"
 
 # Logging
@@ -87,6 +84,9 @@ emaillog="${scriptlogdir}/${servicename}.log"
 
 scriptlogdate="${scriptlogdir}/${servicename}_$(date '+%d-%m-%Y-%H-%M-%S').log"
 consolelogdate="${servicename}_$(date '+%H-%M-%S').rpt"
+
+# Executable with logging
+executable="./arma3server >>${consolelog} 2>&1"
 
 ##### Script #####
 # Do not edit
