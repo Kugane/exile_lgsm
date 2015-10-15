@@ -26,7 +26,7 @@ port="2302"
 updateonstart="off"
 
 fn_parms(){
-parms=" -ip=${ip} -port=${port} -name="${servicename}" -cfg=${networkcfgfullpath} -config=${servercfgfullpath} -loadMissionToMemory -ServerMod=${servermods} -mod=${mods} -autoInit -nolog"
+parms="-ip=${ip} -port=${port} -name="${servicename}" -cfg=${networkcfgfullpath} -config=${servercfgfullpath} -loadMissionToMemory -ServerMod=${servermods} -mod=${mods} -autoInit -nolog"
 }
 
 # ARMA 3 Modules
