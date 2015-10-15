@@ -15,6 +15,8 @@ case "$getopt" in
 		fn_stop;;
 	restart)
 		fn_restart;;
+	debug)
+		fn_debug;;
 	update)
 		fn_update_check;;
 	force-update)
@@ -39,7 +41,7 @@ case "$getopt" in
 	depsdetect)
 		fn_deps_detect;;		
 	*)
-	echo "Usage: $0 {start|stop|restart|update|force-update|update-functions|validate|monitor|email-test|details|backup|install|auto-install}"
+	echo "Usage: $0 {start|stop|restart|debug|update|force-update|update-functions|validate|monitor|email-test|details|backup|install|auto-install}"
 	exit 1;;
 esac
 exit

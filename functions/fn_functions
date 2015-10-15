@@ -48,6 +48,11 @@ functionfile="${FUNCNAME}"
 fn_runfunction
 }
 
+fn_debug(){
+functionfile="${FUNCNAME}"
+fn_runfunction
+}
+
 fn_details(){
 functionfile="${FUNCNAME}"
 fn_runfunction
