@@ -75,6 +75,7 @@ Email Notification
 5. Run the installer and follow the instructions.
 <pre>./exileserver install</pre>
 
+If steamcmd stuck on login in. Pls cancel the installation & login manually in steamcmd for the first time
 </div>
 
 
