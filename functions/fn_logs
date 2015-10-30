@@ -40,9 +40,9 @@ if [ $(find "${scriptlogdir}"/ -type f -mtime +${logdays}|wc -l) -ne "0" ]; then
 
 	count=$((${scriptcount} + ${consolecount}))
 
-	find "${scriptlogdir}"/ -mtime +${logdays} -type f -exec rm -f {} \;
+	find "${scriptlogdirstored}"/ -mtime +${logdays} -type f -exec rm -f {} \;
 	if [ -n "${consolelog}" ]; then
-		find "${consolelogdirstored}"/ -mtime +${logdays} -type f -exec rm -rf {} \;
+		find "${consolelogdirstored}"/ -mtime +${logdays} -type f -exec rm -f {} \;
 	fi
 	fn_printok "Removed ${count} log files"
 	fn_scriptlog "Removed ${count} log files"

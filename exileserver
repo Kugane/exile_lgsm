@@ -76,17 +76,19 @@ logdays="7"
 
 scriptlogdir="${rootdir}/log/script"
 consolelogdir="${rootdir}/log/console"
-consolelogdirstored="${rootdir}/log/console/$(date +%Y)/$(date +%m)/$(date +%d)"
+scriptlogdirstored="${rootdir}/log/script/old/${servicename}"
+consolelogdirstored="${rootdir}/log/console/old/${servicename}"
 
 scriptlog="${scriptlogdir}/${servicename}.log"
 consolelog="${consolelogdir}/${servicename}.rpt"
 emaillog="${scriptlogdir}/${servicename}.log"
 
-scriptlogdate="${scriptlogdir}/${servicename}_$(date '+%d-%m-%Y-%H-%M-%S').log"
+scriptlogdate="${servicename}_$(date '+%H-%M-%S').log"
 consolelogdate="${servicename}_$(date '+%H-%M-%S').rpt"
 
 # Executable with logging
 executable="./arma3server >>${consolelog} 2>&1"
+
 
 ##### Script #####
 # Do not edit

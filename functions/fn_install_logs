@@ -14,9 +14,11 @@ sleep 1
 # Create dir's for the script and console logs
 mkdir -v "${rootdir}/log"
 mkdir -v "${scriptlogdir}"
+mkdir -v "${scriptlogdirstored}"
 touch "${scriptlog}"
 if [ -n "${consolelogdir}" ]; then
 	mkdir -v "${consolelogdir}"
+	mkdir -v "${consolelogdirstored}"
 fi
 
 # If server uses SteamCMD create a symbolic link to the Steam logs.

@@ -30,11 +30,9 @@ fi
 tmuxwc=$(tmux list-sessions 2>&1|awk '{print $1}'|grep -v failed|grep -Ec "^${servicename}:")
 if [ "${tmuxwc}" -eq 0 ]; then
 	fn_scriptlog "Rotating log files"
-	mv "${scriptlog}" "${scriptlogdate}"
-	cd "${consolelogdir}"/ && mkdir -p "${consolelogdirstored}"
-	sleep 2
+	mv "${scriptlog}" "${scriptlogdirstored}"/"${scriptlogdate}"
 	mv "${consolelog}" "${consolelogdirstored}"/"${consolelogdate}"
-	sleep 2
+	sleep 1
 fi
 
 if [ "${tmuxwc}" -eq 1 ]; then
